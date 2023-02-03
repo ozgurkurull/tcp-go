@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-const MAX = 5
+const MAX = 2
 
 func main() {
 	sem := make(chan int, MAX)
@@ -16,7 +16,7 @@ func main() {
 		count++
 
 		go func() {
-			rand := 100 + rand.Intn(300)
+			rand := 100 + rand.Intn(1000)
 			t := fmt.Sprintf("%dms", rand)
 			ms, _ := time.ParseDuration(t)
 

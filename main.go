@@ -5,14 +5,13 @@ import (
 	"fmt"
 	"log"
 	"net"
-	"runtime"
 )
-
-var currentConnectionCount int = 0
 
 //https://go.dev/blog/pipelines
 //https://stackoverflow.com/questions/25306073/always-have-x-number-of-goroutines-running-at-any-time
 //https://alexyakunin.medium.com/go-vs-c-part-1-goroutines-vs-async-await-ac909c651c11
+
+var currentConnectionCount int = 0
 
 func main() {
 	ln, err := net.Listen("tcp", ":10001")
@@ -21,7 +20,6 @@ func main() {
 	}
 
 	log.Printf("listen started")
-	fmt.Printf("GOMAXPROCS: %d\n", getGOMAXPROCS())
 	for {
 		conn, err := ln.Accept()
 		if err != nil {
@@ -34,21 +32,21 @@ func main() {
 }
 
 func serve(conn net.Conn) {
+	ra := conn.RemoteAddr()
+	log.Printf("New data is waiting. %s", ra.String())
+
 	bufr := bufio.NewReader(conn)
 	for {
 		line, err := bufr.ReadString('\n')
 		if err != nil {
+			log.Printf("Connection is closed 1. %s", ra.String())
 			currentConnectionCount--
 			return
 		}
 
-		log.Printf("Data: %s", line)
+		log.Printf("%s : %s", ra.String(), line)
 
 		response := fmt.Sprintf("OK : %s", line)
 		conn.Write([]byte(response))
 	}
-}
-
-func getGOMAXPROCS() int {
-	return runtime.GOMAXPROCS(0)
 }
